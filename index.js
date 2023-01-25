@@ -51,6 +51,7 @@ const fetchQuotes = async () => {
       getRecentQuotes(...req)
         .then(quotes => {
           if (!quotes?.length) {
+            log(`[${i + 1}/${reqs.length}]`, `No new ${req[0]} quotes.`);
             return;
           }
           db.batchInsert("Quotes", quotes, 100)
