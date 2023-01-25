@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "cron": "NODE_NO_WARNINGS=1 node index.js cron",
-    "debug": "node index.js debug"
+    "debug": "NODE_NO_WARNINGS=1 node index.js debug"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +14,6 @@
     "dotenv": "^16.0.3",
     "knex": "^2.4.2",
     "node-cron": "^3.0.2",
-    "sqlite3": "^5.1.4",
-    "tedious": "^15.1.2"
+    "sqlite3": "^5.1.4"
   }
 }
