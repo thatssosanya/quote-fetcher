@@ -2,9 +2,12 @@
 fetches quotes from nasdaq.com
 
 ## Setup
-`npm install`
 
-To use in cron mode, copy .env.example, rename the copy to .env, and supply variable values.
+1. Install Node.js.
+
+2. `npm install`
+
+3. To use in cron mode, copy .env.example, rename the copy to .env, and supply variable values.
 
 ## Usage
 
