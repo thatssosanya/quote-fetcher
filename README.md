@@ -5,28 +5,30 @@ fetches quotes from nasdaq.com
 
 1. Install Node.js.
 
-2. `npm install`
+2. Clone repo.
 
-3. To use in cron mode, copy .env.example, rename the copy to .env, and supply variable values.
+3. `npm install` in repo's root.
 
 ## Usage
 
-`npm run debug`
-
-Runs once, uses SQLite.
+`npm run {"debug" or "cron"} {symbol count - optional} {1 to 5 cron timing values - optional}`
 
 ---
 
-`npm run cron`
+debug - runs once.
 
-Runs on default timing (every hour on the 15th minute), uses MS SQL Server.
+cron - runs repeatedly.
 
 ---
 
-`npm run cron {1 to 5 cron timing values}`
+Symbol count determines how many symbols will be processed. 100 by default.
 
-Runs on supplied timing (see [crontab](https://crontab.guru/) for format; missing spots will be filled in with *).
+---
+
+Cron timing determines when the cron job runs. 15 * * * * by default.
+
+See [crontab](https://crontab.guru/) for format; missing spots will be filled in with *.
 
 For example,
-`npm run cron 30 20`
-is equivalent to `npm run cron 30 20 * * *` and will run every day on 20:30.
+`npm run cron 100 30 20`
+is equivalent to `npm run cron 100 30 20 * * *` and will run every day on 20:30.
