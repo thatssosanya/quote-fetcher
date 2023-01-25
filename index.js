@@ -61,5 +61,10 @@ const fetchQuotes = async () => {
 if (debug) {
   await fetchQuotes();
 } else {
-  cron.schedule("16 7 * * *", fetchQuotes, {scheduled: true, timezone: "UTC"});
+  const argTiming = process.argv?.slice(3);
+  if (argTiming.length === 0) {
+    argTiming.push(15);
+  }
+  const timing = [...argTiming, ...Array(5 - argTiming.length).fill("*")].join(" ");
+  cron.schedule(timing, fetchQuotes, {scheduled: true, timezone: "UTC"});
 }
