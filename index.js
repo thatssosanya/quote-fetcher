@@ -61,7 +61,7 @@ const fetchQuotes = async () => {
     )
     await new Promise(r => setTimeout(r, 250));
   }
-  Promise.all(promises).then("All done for today.");
+  Promise.all(promises).then(() => log("All done for today."));
 };
 
 if (debug) {
