@@ -1,0 +1,20 @@
+{
+  "name": "quote-fetcher",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "cron": "NODE_NO_WARNINGS=1 node index.js",
+    "debug": "node index.js debug"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "knex": "^2.4.2",
+    "node-cron": "^3.0.2",
+    "sqlite3": "^5.1.4",
+    "tedious": "^15.1.2"
+  }
+}
