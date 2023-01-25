@@ -11,7 +11,7 @@ const headers = {
   "sec-fetch-site": "same-site"
 };
 
-export const getSymbols = (count = 1) => {
+export const getSymbols = (count) => {
   const url = "https://api.nasdaq.com/api/screener/stocks?download=true";
   return fetch(url, {headers})
     .then(r => r.json())
@@ -37,7 +37,7 @@ const encodeSymbol = (symbol) => symbol.replace("\/", "%25sl%25");
 const formatDate = (date) => {
   const yyyy = date.getFullYear();
   const mm = (date.getMonth() + 1).toString().padStart(2, "0");
-  const dd = date.getDate();
+  const dd = date.getDate().toString().padStart(2, "0");
   return [yyyy, mm, dd].join("-");
 };
 
@@ -47,8 +47,8 @@ const getQuotes = (symbol, fromDate, toDate) => {
   return fetch(url, {headers})
     .then(r => r.json())
     .then(r =>
-      r.data.chart
-        .map(day => {
+      r.data?.chart
+        ?.map(day => {
           const {dateTime, value, ...z} = day.z;
           const quote = Object.fromEntries(
             Object.entries(z)
@@ -66,8 +66,7 @@ const getQuotes = (symbol, fromDate, toDate) => {
     .catch(e => console.error(`Failed to get quotes for ${symbol}:\n`, e));
 };
 
-export const getRecentQuotes = (symbol, days = 1) => {
+export const getRecentQuotes = (symbol, from) => {
   const to = new Date();
-  const from = new Date(new Date().setDate(to.getDate() - days));
   return getQuotes(symbol, from, to);
 };

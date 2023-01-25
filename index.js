@@ -2,10 +2,12 @@ import {getSymbols, getRecentQuotes} from "./fetchers.js";
 import {debugConf, cronConf} from "./knexfile.js";
 import knex from "knex";
 import cron from "node-cron";
-import dotenv from "dotenv";
-dotenv.config();
 
-const debug = process.argv?.[2] === "debug"
+const MS_PER_DAY = (1000 * 60 * 60 * 24);
+
+const symbols_count = parseInt(process.argv?.[3] || 100);
+
+const debug = process.argv?.[2] === "debug";
 
 const db = knex(debug ? debugConf : cronConf);
 
@@ -26,42 +28,45 @@ const log = (...args) =>
   console.log(`[${new Date().toLocaleString()}]`, ...args);
 
 const fetchQuotes = async () => {
-  log("Started fetching.");
+  log("Started processing.");
 
   const dbQuotes = await db
     .select("Symbol", "Date")
     .from("Quotes")
     .groupBy("Symbol");
   const dbSymbols = dbQuotes.map(q => q.Symbol);
-  const webSymbols = await getSymbols();
+  const webSymbols = await getSymbols(symbols_count);
 
-  const reqs = dbSymbols.map(s => [s]).concat(
-    webSymbols.filter(s => !dbSymbols.includes(s)).map(s => [s, 30])
-  );
+  const reqs =
+    dbQuotes
+      .map(s => [s.Symbol, new Date(s.Date + MS_PER_DAY)])
+      .concat(
+        webSymbols.filter(s => !dbSymbols.includes(s)).map(s => [s, new Date(0)])
+      );
   log(reqs.length, "symbols to process.");
 
-  const recentQuoteResults = await Promise.allSettled(
-    reqs.map(req => getRecentQuotes(...req))
-  );
-  const recentQuotes = recentQuoteResults
-    .filter(r => r.status === "fulfilled" && r.value?.length)
-    .map(r => r.value.filter(quote => {
-      const dbQuote = dbQuotes.find(dbQuote => dbQuote.Symbol === quote.Symbol);
-      return !dbQuote || dbQuote.Date < quote.Date;
-    }))
-    .flat(1)
-    .sort((a, b) => b.Date - a.Date);
-
-  log("Inserting", recentQuotes.length, "new quotes.");
-  await Promise.all(recentQuotes.map(quote => db.insert(quote).into("Quotes")));
-
-  log("Done for today.");
+  const promises = [];
+  for (const [i, req] of reqs.entries()) {
+    promises.push(
+      getRecentQuotes(...req)
+        .then(quotes => {
+          if (!quotes?.length) {
+            return;
+          }
+          db.batchInsert("Quotes", quotes, 100)
+            .then(() => log(`[${i + 1}/${reqs.length}]`,
+              `Inserted ${quotes.length} new ${req[0]} quotes.`));
+        })
+    )
+    await new Promise(r => setTimeout(r, 250));
+  }
+  Promise.all(promises).then("All done for today.");
 };
 
 if (debug) {
   await fetchQuotes();
 } else {
-  const argTiming = process.argv?.slice(3);
+  const argTiming = process.argv?.slice(4);
   if (argTiming.length === 0) {
     argTiming.push(15);
   }
